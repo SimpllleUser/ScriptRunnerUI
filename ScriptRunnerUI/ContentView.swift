@@ -10,50 +10,40 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    
+    @State var currentProject = "my-vue-app"
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+        VStack() {
+            HeaderView(title: "Cardona", projectPath: "projectPath", isMutipleLock: false)
+            Spacer()
+        }.background(Theme.Surface.paper)
+            .frame(alignment: .topLeading)
             .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                ToolbarItem(placement: .principal) {
+                    Text(currentProject)
+                        .foregroundStyle(Theme.Text.ink)
+                        .font(Typography.sidebarItem)
+                }.sharedBackgroundVisibility(Visibility.hidden)
+                ToolbarItem(placement: .automatic) {
+                    HStack(spacing: 15) {
+                        ButtonView(label: "Stop all", icon: "stop.circle", onClick: {
+                            print("Stop")
+                        })
+                        ButtonView(icon: "arrow.trianglehead.clockwise.rotate.90",onClick: {
+                            print("Refresah")
+                        })
+                        ButtonView(icon: "folder", onClick: {
+                            print("Open project")
+                        })
+                    }.padding(.trailing, 15)
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
+    
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .frame(width: 1080, height: 832)
 }
