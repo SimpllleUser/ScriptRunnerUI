@@ -34,6 +34,7 @@ struct HeaderView: View {
                 Text(projectPath)
                     .foregroundStyle(Theme.Text.ink4)
                     .padding(.leading, 15)
+                    .padding(.bottom, projectPath.isEmpty ? 15 : 0)
             }.padding(.leading, 15)
             Divider()
         }
@@ -43,6 +44,6 @@ struct HeaderView: View {
 }
 
 #Preview("13\" MacBook - Default") {
-    HeaderView(title: "web-dashboard", projectPath: "~/dev/web-dashboard", isMutipleLock: true)
+    HeaderView(title: "web-dashboard", projectPath: "test", isMutipleLock: true)
         .frame(width: 1280, height: 832, alignment: .topLeading)
 }

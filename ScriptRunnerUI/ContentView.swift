@@ -7,15 +7,16 @@
 
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State var currentProject = "my-vue-app"
-    
+    @State var projectPath = ""
     var body: some View {
         VStack() {
-            HeaderView(title: "Cardona", projectPath: "projectPath", isMutipleLock: false)
+            HeaderView(title: "Cardona", projectPath: projectPath, isMutipleLock: false)
             Spacer()
         }.background(Theme.Surface.paper)
             .frame(alignment: .topLeading)
@@ -34,13 +35,25 @@ struct ContentView: View {
                             print("Refresah")
                         })
                         ButtonView(icon: "folder", onClick: {
-                            print("Open project")
+                            selectFile()
                         })
                     }.padding(.trailing, 15)
+                }.sharedBackgroundVisibility(Visibility.hidden)
+            }.background(Color.red)
+    }
+    private func selectFile() {
+            let panel = NSOpenPanel()
+            panel.allowsMultipleSelection = false
+            panel.canChooseDirectories = true
+            panel.canChooseFiles = false
+            
+            if panel.runModal() == .OK {
+                if let url = panel.url {
+                    /// Add check for packajes and node_modules
+                    projectPath = url.path
                 }
             }
-    }
-    
+        }
 }
 
 #Preview {
