@@ -13,7 +13,8 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State var currentProject = "my-vue-app"
-    @State var projectPath = ""
+    @State var projectPath = "~/mu-pc/projects/CRM"
+    @State var showAlertOpenProject = false
     var body: some View {
         VStack() {
             HeaderView(title: "Cardona", projectPath: projectPath, isMutipleLock: false)
@@ -35,25 +36,20 @@ struct ContentView: View {
                             print("Refresah")
                         })
                         ButtonView(icon: "folder", onClick: {
-                            selectFile()
+                            showAlertOpenProject = true
+                            
                         })
                     }.padding(.trailing, 15)
                 }.sharedBackgroundVisibility(Visibility.hidden)
             }.background(Color.red)
-    }
-    private func selectFile() {
-            let panel = NSOpenPanel()
-            panel.allowsMultipleSelection = false
-            panel.canChooseDirectories = true
-            panel.canChooseFiles = false
-            
-            if panel.runModal() == .OK {
-                if let url = panel.url {
-                    /// Add check for packajes and node_modules
-                    projectPath = url.path
-                }
+            .customDialog(isPresented: $showAlertOpenProject) {
+                SelectProjectAlertView {
+                     url in
+                        self.projectPath = url
+                    self.showAlertOpenProject.toggle()
+                    }
             }
-        }
+    }
 }
 
 #Preview {

@@ -1,0 +1,74 @@
+//
+//  SelectProjectAlertView.swift
+//  ScriptRunnerUI
+//
+//  Created by v.pecheritsya on 04.09.2026.
+//
+
+import SwiftUI
+
+struct SelectProjectAlertView: View {
+    
+    var onProjectSelected: (String) -> Void
+    var body: some View {
+        VStack {
+            HStack(spacing: 0) {
+                    Image(systemName: "folder")
+                    .foregroundStyle(Theme.Text.ink4)
+                    .font(.system(size: 45))
+            }.padding(.bottom, 10)
+            HStack(spacing: 0) {
+                Text("No projects")
+                    .font(Typography.projectTitle)
+                    .padding(15)
+            }
+            HStack {
+                Text("Add a folder that contains package.json.")
+                    .font(.system(.title3))
+                    .foregroundStyle(Theme.Text.ink4)
+            }
+            .padding(15)
+            HStack {
+                Button(action: {
+                    selectFile()
+                }){
+                    Text("Add project")
+                        .foregroundStyle(Theme.Surface.paper)
+                        .padding(.vertical, 3)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .padding(5)
+                .padding(.horizontal, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: CornerRadius.toolbarSidebarItem)
+                        .fill(Theme.Brand.brand)
+                    
+                )
+            }
+        }
+    }
+    
+    private func selectFile() {
+        // Open dialog for select project
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                /// Add check for packajes and node_modules
+                
+                onProjectSelected(url.path)
+            }
+        }
+    }
+}
+
+#Preview {
+    SelectProjectAlertView(onProjectSelected: { url in
+        print("URL :\(url)")
+    })
+        .frame(width: 800, height: 800)
+}
