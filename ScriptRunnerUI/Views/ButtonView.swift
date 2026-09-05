@@ -28,12 +28,7 @@ struct ButtonView: View {
             .padding(10)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .background(
-            RoundedRectangle(cornerRadius: CornerRadius.toolbarSidebarItem)
-                .stroke(Theme.Surface.paper4, lineWidth: 2)
-            
-        )
+        .buttonStyle(AnimatedButtonStyle())
     }
 }
 
