@@ -9,11 +9,15 @@ import SwiftUI
 
 struct SelectProjectAlertView: View {
     
+    struct PackageJSON: Codable {
+        let scripts: [String: String]?
+    }
+    
     var onProjectSelected: (String) -> Void
     var body: some View {
         VStack {
             HStack(spacing: 0) {
-                    Image(systemName: "folder")
+                Image(systemName: "folder")
                     .foregroundStyle(Theme.Text.ink4)
                     .font(.system(size: 45))
             }.padding(.bottom, 10)
@@ -58,10 +62,40 @@ struct SelectProjectAlertView: View {
         
         if panel.runModal() == .OK {
             if let url = panel.url {
-                /// Add check for packajes and node_modules
-                
                 onProjectSelected(url.path)
+                if let content = readFile(at: "\(url.path)/package.json") {
+                    if let scriptsDictionary = extractScripts(from: content) {
+                        for (name, command) in scriptsDictionary {
+                            print("Назва: \(name) | Команда: \(command)")
+                        }
+                    }
+                }
             }
+        }
+    }
+    
+    func readFile(at path: String) -> String? {
+        let fileURL = URL(fileURLWithPath: path)
+        
+        do {
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            return content
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
+    }
+    
+    func extractScripts(from jsonString: String) -> [String: String]? {
+        guard let jsonData = jsonString.data(using: .utf8) else {
+            return nil
+        }
+        do {
+            let decoded = try JSONDecoder().decode(PackageJSON.self, from: jsonData)
+            return decoded.scripts
+        } catch {
+            print("Помилка парсингу JSON: \(error.localizedDescription)")
+            return nil
         }
     }
 }
@@ -70,5 +104,5 @@ struct SelectProjectAlertView: View {
     SelectProjectAlertView(onProjectSelected: { url in
         print("URL :\(url)")
     })
-        .frame(width: 800, height: 800)
+    .frame(width: 800, height: 800)
 }
