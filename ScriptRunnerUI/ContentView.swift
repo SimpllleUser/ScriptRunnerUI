@@ -71,9 +71,12 @@ struct ContentView: View {
                         self.currentProject = String(result.path.split(separator: "/").last ?? "")
                         self.commands = result.commands
                         viewModel.addProject(name: self.currentProject, path: self.projectPath, scripts: self.commands, context: modelContext)
+                        showAlertOpenProject = false
                     }
                 } else if (dialogState == .errror) {
-                    Text("Error")
+                    ErrorSelectProjectAlert(reload: {
+                        dialogState = .base
+                    })
                 }
             }.onChange(of: showAlertOpenProject) { oldValue, newValue in
                 if newValue == false {
