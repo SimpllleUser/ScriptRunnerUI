@@ -11,6 +11,8 @@ import AppKit
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+        @Query(sort: \Project.name) private var projects: [Project]
+        @State private var viewModel = ProjectViewModel()
     
     @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
@@ -21,8 +23,14 @@ struct ContentView: View {
             HeaderView(title: "Cardona", projectPath: projectPath, isMutipleLock: false)
             Spacer()
             VStack {
-                ForEach(commands, id: \.self) { command in
-                    Text(command).padding(10).background(Color.blue).foregroundStyle(Color.black)
+                ForEach(projects) { project in
+                    HStack {
+                        Text(project.name).padding(2).background(Color.blue).foregroundStyle(Color.black)
+                        Divider()
+                        Text(project.path).padding(2).background(Color.blue).foregroundStyle(Color.black)
+                        Divider()
+                        Text(project.scripts.joined(separator: ",")).padding(2).background(Color.blue).foregroundStyle(Color.black)
+                    }
                 }
             }
         }.background(Theme.Surface.paper)
@@ -54,6 +62,8 @@ struct ContentView: View {
                     self.projectPath = url
                     self.currentProject = String(url.split(separator: "/").last ?? "")
                     self.commands = comands
+                    
+                    viewModel.addProject(name: self.currentProject, path: self.projectPath, scripts: self.commands, context: modelContext)
                     self.showAlertOpenProject.toggle()
                 }
             }

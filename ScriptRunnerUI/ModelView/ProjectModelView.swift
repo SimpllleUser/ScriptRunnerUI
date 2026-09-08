@@ -13,19 +13,19 @@ import SwiftUI
 @MainActor
 final class ProjectViewModel {
     
-    private let context: ModelContext
+//    private let context: ModelContext
 //    private var projects: [Project] = []
     
-    init(context: ModelContext) {
-        self.context = context
+    init() {
+        
     }
     
-    func addProject(name: String, path: String, scripts: [String] ) {
+    func addProject(name: String, path: String, scripts: [String], context: ModelContext) {
         let newProject = Project(path: path, scripts: scripts,  name: name)
-        self.context.insert(newProject)
+        context.insert(newProject)
     }
     
-    func removeProject(project: Project) {
-        self.context.delete(project)
+    func removeProject(project: Project, context: ModelContext) {
+        context.delete(project)
     }
 }
