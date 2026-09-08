@@ -9,15 +9,18 @@ import SwiftUI
 import SwiftData
 import AppKit
 
+enum DialogStateTypes { case base, errror, success }
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-        @Query(sort: \Project.name) private var projects: [Project]
-        @State private var viewModel = ProjectViewModel()
+    @Query(sort: \Project.name) private var projects: [Project]
+    @State private var viewModel = ProjectViewModel()
     
     @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
     @State var showAlertOpenProject = false
     @State var commands: [String] = []
+    @State var dialogState = DialogStateTypes.base
     var body: some View {
         VStack() {
             HeaderView(title: "Cardona", projectPath: projectPath, isMutipleLock: false)
@@ -57,14 +60,24 @@ struct ContentView: View {
                 }.sharedBackgroundVisibility(Visibility.hidden)
             }.background(Color.red)
             .customDialog(isPresented: $showAlertOpenProject) {
-                SelectProjectAlertView {
-                    url, comands in
-                    self.projectPath = url
-                    self.currentProject = String(url.split(separator: "/").last ?? "")
-                    self.commands = comands
-                    
-                    viewModel.addProject(name: self.currentProject, path: self.projectPath, scripts: self.commands, context: modelContext)
-                    self.showAlertOpenProject.toggle()
+                if (dialogState == .base) {
+                    SelectProjectAlertView { result in
+                        guard let result = result else {
+                            print("Error on get project config")
+                            dialogState = .errror
+                            return
+                        }
+                        self.projectPath = result.path
+                        self.currentProject = String(result.path.split(separator: "/").last ?? "")
+                        self.commands = result.commands
+                        viewModel.addProject(name: self.currentProject, path: self.projectPath, scripts: self.commands, context: modelContext)
+                    }
+                } else if (dialogState == .errror) {
+                    Text("Error")
+                }
+            }.onChange(of: showAlertOpenProject) { oldValue, newValue in
+                if newValue == false {
+                    dialogState = .base
                 }
             }
     }

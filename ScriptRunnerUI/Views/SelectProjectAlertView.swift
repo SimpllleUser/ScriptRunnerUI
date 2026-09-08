@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectProjectAlertView: View {
     
-    var onProjectSelected: (String, [String]) -> Void
+    var onProjectSelected: ((_ result: (path: String, commands: [String])?) -> Void)
     var body: some View {
         VStack {
             HStack(spacing: 0) {
@@ -52,8 +52,10 @@ struct SelectProjectAlertView: View {
 }
 
 #Preview {
-    SelectProjectAlertView(onProjectSelected: { url, commands in
-        print("URL :\(url)")
+    SelectProjectAlertView(onProjectSelected: { result in
+        if (result != nil) {
+            print(result?.path ?? "")
+        }
     })
     .frame(width: 800, height: 800)
 }
