@@ -19,7 +19,7 @@ struct ContentView: View {
     @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
     @State var showAlertOpenProject = false
-    @State var commands: [String] = []
+    //    @State var commands: [String: String]
     @State var dialogState = DialogStateTypes.base
     var body: some View {
         VStack() {
@@ -32,7 +32,20 @@ struct ContentView: View {
                         Divider()
                         Text(project.path).padding(2).background(Color.blue).foregroundStyle(Color.black)
                         Divider()
-                        Text(project.scripts.joined(separator: ",")).padding(2).background(Color.blue).foregroundStyle(Color.black)
+                        ForEach(Array(project.commands.keys), id: \.self) { key in
+                            HStack {
+                                Text(key)
+                                    .padding(2)
+                                    .background(Color.green)
+                                    .foregroundStyle(Color.black)
+                                if let value = project.commands[key] {
+                                    Text(value)
+                                        .padding(2)
+                                        .background(Color.gray)
+                                        .foregroundStyle(Color.black)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -50,7 +63,7 @@ struct ContentView: View {
                             print("Stop")
                         })
                         ButtonView(icon: "arrow.trianglehead.clockwise.rotate.90",onClick: {
-                            print("Refresah")
+                            viewModel.deleteAllProjects(context: modelContext)
                         })
                         ButtonView(icon: "folder", onClick: {
                             showAlertOpenProject = true
@@ -63,14 +76,17 @@ struct ContentView: View {
                 if (dialogState == .base) {
                     SelectProjectAlertView { result in
                         guard let result = result else {
-                            print("Error on get project config")
                             dialogState = .errror
                             return
                         }
                         self.projectPath = result.path
                         self.currentProject = String(result.path.split(separator: "/").last ?? "")
-                        self.commands = result.commands
-                        viewModel.addProject(name: self.currentProject, path: self.projectPath, scripts: self.commands, context: modelContext)
+                        viewModel.addProject(
+                            name: self.currentProject,
+                            path: self.projectPath,
+                            commands: result.commands,
+                            context: modelContext
+                        )
                         showAlertOpenProject = false
                     }
                 } else if (dialogState == .errror) {

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SelectProjectAlertView: View {
     
-    var onProjectSelected: ((_ result: (path: String, commands: [String])?) -> Void)
+    var onProjectSelected: ((_ result: (path: String, commands: [String: String])?) -> Void)
     var body: some View {
         VStack {
             HStack(spacing: 0) {

@@ -20,12 +20,21 @@ final class ProjectViewModel {
         
     }
     
-    func addProject(name: String, path: String, scripts: [String], context: ModelContext) {
-        let newProject = Project(path: path, scripts: scripts,  name: name)
+    func addProject(name: String, path: String, commands: [String: String], context: ModelContext) {
+        let newProject = Project(path: path, commands: commands,  name: name)
         context.insert(newProject)
     }
     
     func removeProject(project: Project, context: ModelContext) {
         context.delete(project)
     }
+    
+    func deleteAllProjects(context: ModelContext) {
+            do {
+                try context.delete(model: Project.self)
+                print("Базу даних успішно очищено!")
+            } catch {
+                print("Помилка очищення БД: \(error.localizedDescription)")
+            }
+        }
 }

@@ -12,13 +12,13 @@ import Foundation
 final class Project: Equatable {
     var id: UUID
     var path: String
-    var scripts: [String]
+    var commands: [String: String]
     var name: String
     
-    init (path: String, scripts: [String], name: String) {
+    init (path: String, commands: [String: String], name: String) {
         self.id = UUID()
         self.path = path
-        self.scripts = scripts
+        self.commands = commands
         self.name = name
     }
 }

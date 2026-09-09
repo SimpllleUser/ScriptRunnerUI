@@ -5,7 +5,7 @@ struct PackageJSON: Decodable {
 }
 
 
-func selectFile(onProjectSelected: ((_ result: (path: String, commands: [String])?) -> Void)) {
+func selectFile(onProjectSelected: ((_ result: (path: String, commands: [String: String])?) -> Void)) {
     let panel = NSOpenPanel()
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = true
@@ -19,8 +19,7 @@ func selectFile(onProjectSelected: ((_ result: (path: String, commands: [String]
         return
     }
     
-    let commands = Array(scriptsDictionary.keys)
-    onProjectSelected((path: url.path, commands: commands))
+    onProjectSelected((path: url.path, commands: scriptsDictionary))
 }
 
 private func readFile(at path: String) -> String? {
