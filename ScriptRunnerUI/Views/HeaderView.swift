@@ -20,8 +20,7 @@ struct HeaderView: View {
                     .foregroundStyle(Theme.Text.ink)
                     .font(Typography.projectTitle)
                 Spacer()
-            }
-            .padding(.leading, 15)
+            }.padding(.horizontal, 10)
             HStack(spacing: 0) {
                 SelectView(selection: $packageManager)
                 if (isMutipleLock) {
@@ -35,10 +34,10 @@ struct HeaderView: View {
                     .foregroundStyle(Theme.Text.ink4)
                     .padding(.leading, 15)
                     .padding(.bottom, projectPath.isEmpty ? 15 : 0)
-            }.padding(.leading, 15)
+            }.padding(.horizontal, 10)
             Divider()
+            Spacer()
         }
-        .padding(.top, 15)
         .background(Theme.Surface.paper)
     }
 }

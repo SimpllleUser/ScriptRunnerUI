@@ -1,104 +1,130 @@
-//
-//  ContentView.swift
-//  ScriptRunnerUI
-//
-//  Created by v.pecheritsya on 03.09.2026.
-//
-
 import SwiftUI
 import SwiftData
 import AppKit
 
-enum DialogStateTypes { case base, errror, success }
+enum DialogStateTypes {
+    case base
+    case errror
+    case success
+}
 
 struct ContentView: View {
+    
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Project.name) private var projects: [Project]
+    
     @State private var viewModel = ProjectViewModel()
     
     @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
+    
     @State var showAlertOpenProject = false
-    //    @State var commands: [String: String]
     @State var dialogState = DialogStateTypes.base
+    
     var body: some View {
-        VStack() {
-            HeaderView(title: "Cardona", projectPath: projectPath, isMutipleLock: false)
-            Spacer()
-            VStack {
-                ForEach(projects) { project in
-                    HStack {
-                        Text(project.name).padding(2).background(Color.blue).foregroundStyle(Color.black)
-                        Divider()
-                        Text(project.path).padding(2).background(Color.blue).foregroundStyle(Color.black)
-                        Divider()
-                        ForEach(Array(project.commands.keys), id: \.self) { key in
-                            HStack {
-                                Text(key)
-                                    .padding(2)
-                                    .background(Color.green)
-                                    .foregroundStyle(Color.black)
-                                if let value = project.commands[key] {
-                                    Text(value)
-                                        .padding(2)
-                                        .background(Color.gray)
-                                        .foregroundStyle(Color.black)
-                                }
-                            }
-                        }
-                    }
-                }
+        HStack(spacing: 0) {
+            
+            NavBarView(projects: DEV_PROJECTS)
+                .frame(width: 300)
+                .frame(maxHeight: .infinity)
+                .overlay(
+                    Rectangle()
+                        .fill(Theme.Surface.paper3)
+                        .frame(width: 2),
+                    alignment: .trailing
+                )
+            
+            VStack(spacing: 0) {
+                HeaderView(
+                    title: "Cardona",
+                    projectPath: projectPath,
+                    isMutipleLock: false
+                )
+                .padding(.top, 12)
+                
+                Spacer()
             }
-        }.background(Theme.Surface.paper)
-            .frame(alignment: .topLeading)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(currentProject)
-                        .foregroundStyle(Theme.Text.ink)
-                        .font(Typography.sidebarItem)
-                }.sharedBackgroundVisibility(Visibility.hidden)
-                ToolbarItem(placement: .automatic) {
-                    HStack(spacing: 15) {
-                        ButtonView(label: "Stop all", icon: "stop.circle", onClick: {
+            .frame(
+                maxWidth: .infinity,
+                maxHeight: .infinity,
+                alignment: .topLeading
+            )
+        }
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
+        )
+        .background(Theme.Surface.paper)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(currentProject)
+                    .foregroundStyle(Theme.Text.ink)
+                    .font(Typography.sidebarItem)
+            }
+            .sharedBackgroundVisibility(.hidden)
+            
+            ToolbarItem(placement: .automatic) {
+                HStack(spacing: 15) {
+                    ButtonView(
+                        label: "Stop all",
+                        icon: "stop.circle",
+                        onClick: {
                             print("Stop")
-                        })
-                        ButtonView(icon: "arrow.trianglehead.clockwise.rotate.90",onClick: {
-                            viewModel.deleteAllProjects(context: modelContext)
-                        })
-                        ButtonView(icon: "folder", onClick: {
-                            showAlertOpenProject = true
-                            
-                        })
-                    }.padding(.trailing, 15)
-                }.sharedBackgroundVisibility(Visibility.hidden)
-            }.background(Color.red)
-            .customDialog(isPresented: $showAlertOpenProject) {
-                if (dialogState == .base) {
-                    SelectProjectAlertView { result in
-                        guard let result = result else {
-                            dialogState = .errror
-                            return
                         }
-                        self.projectPath = result.path
-                        self.currentProject = String(result.path.split(separator: "/").last ?? "")
-                        viewModel.addProject(
-                            name: self.currentProject,
-                            path: self.projectPath,
-                            commands: result.commands,
-                            context: modelContext
-                        )
-                        showAlertOpenProject = false
-                    }
-                } else if (dialogState == .errror) {
-                    ErrorSelectProjectAlert(reload: {
-                        dialogState = .base
-                    })
+                    )
+                    
+                    ButtonView(
+                        icon: "arrow.trianglehead.clockwise.rotate.90",
+                        onClick: {
+                            viewModel.deleteAllProjects(context: modelContext)
+                        }
+                    )
+                    
+                    ButtonView(
+                        icon: "folder",
+                        onClick: {
+                            showAlertOpenProject = true
+                        }
+                    )
                 }
-            }.onChange(of: showAlertOpenProject) { oldValue, newValue in
-                if newValue == false {
+                .padding(.trailing, 15)
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+        .customDialog(isPresented: $showAlertOpenProject) {
+            if dialogState == .base {
+                SelectProjectAlertView { result in
+                    guard let result = result else {
+                        dialogState = .errror
+                        return
+                    }
+                    
+                    projectPath = result.path
+                    currentProject = String(
+                        result.path.split(separator: "/").last ?? ""
+                    )
+                    
+                    viewModel.addProject(
+                        name: currentProject,
+                        path: projectPath,
+                        commands: result.commands,
+                        context: modelContext
+                    )
+                    
+                    showAlertOpenProject = false
+                }
+            } else if dialogState == .errror {
+                ErrorSelectProjectAlert {
                     dialogState = .base
                 }
             }
+        }
+        .onChange(of: showAlertOpenProject) { _, newValue in
+            if !newValue {
+                dialogState = .base
+            }
+        }
     }
 }
 
