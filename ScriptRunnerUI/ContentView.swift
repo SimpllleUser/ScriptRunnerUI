@@ -11,21 +11,28 @@ enum DialogStateTypes {
 struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Project.name) private var projects: [Project]
+     @Query(sort: \Project.name) private var projects: [Project]
     
     @State private var viewModel = ProjectViewModel()
-    
-    @State var currentProject = "my-vue-app"
+    @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
+    @State private var projectId: UUID? = nil
+//    @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
     
     @State var showAlertOpenProject = false
     @State var dialogState = DialogStateTypes.base
+    private var currentProject: Project? {
+        guard let projectId else {
+            return nil
+        }
+
+        return projects.first { $0.id == projectId }
+    }
     
     var body: some View {
         HStack(spacing: 0) {
             
-            NavBarView(projects: DEV_PROJECTS)
-                .frame(width: 300)
+            NavBarView(projects: projects, activeProjectId: $projectId)
                 .frame(maxHeight: .infinity)
                 .overlay(
                     Rectangle()
@@ -33,14 +40,29 @@ struct ContentView: View {
                         .frame(width: 2),
                     alignment: .trailing
                 )
+                .onChange(of: projectId) { _, newValue in
+                    if let newValue = newValue {
+                        projectIdString = newValue.uuidString
+                    }
+                }
+                .onChange(of: projectIdString) { _, newValue in
+                    projectId = UUID(uuidString: newValue)
+                }
             
             VStack(spacing: 0) {
+                if (currentProject?.id != nil) {
                 HeaderView(
-                    title: "Cardona",
-                    projectPath: projectPath,
+                    title: currentProject?.name ?? "",
+                    projectPath: currentProject?.path ?? "",
                     isMutipleLock: false
                 )
                 .padding(.top, 12)
+                } else {
+                    Text("You dont have any project")
+                        .font(Typography.projectTitle)
+                        .foregroundStyle(Theme.Text.ink4)
+                        .padding(15)
+                }
                 
                 Spacer()
             }
@@ -50,6 +72,12 @@ struct ContentView: View {
                 alignment: .topLeading
             )
         }
+        .onChange(of: projects) { _, newProjects in
+            if projectId == nil,
+               let firstProject = newProjects.first {
+                projectId = firstProject.id
+            }
+        }
         .frame(
             maxWidth: .infinity,
             maxHeight: .infinity,
@@ -58,7 +86,7 @@ struct ContentView: View {
         .background(Theme.Surface.paper)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(currentProject)
+                Text(currentProject?.name ?? "")
                     .foregroundStyle(Theme.Text.ink)
                     .font(Typography.sidebarItem)
             }
@@ -100,14 +128,11 @@ struct ContentView: View {
                         return
                     }
                     
-                    projectPath = result.path
-                    currentProject = String(
-                        result.path.split(separator: "/").last ?? ""
-                    )
+                    let name = String(result.path.split(separator: "/").last ?? "")
                     
                     viewModel.addProject(
-                        name: currentProject,
-                        path: projectPath,
+                        name: name,
+                        path: result.path,
                         commands: result.commands,
                         context: modelContext
                     )
@@ -123,6 +148,11 @@ struct ContentView: View {
         .onChange(of: showAlertOpenProject) { _, newValue in
             if !newValue {
                 dialogState = .base
+            }
+        }
+        .onAppear {
+            if projectId == nil, let firstId = projects.first?.id {
+                projectId = firstId
             }
         }
     }
