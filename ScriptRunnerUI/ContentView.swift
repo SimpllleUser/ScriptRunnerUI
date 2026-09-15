@@ -11,12 +11,12 @@ enum DialogStateTypes {
 struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
-     @Query(sort: \Project.name) private var projects: [Project]
+//     @Query(sort: \Project.name) private var projects: [Project]
+    @State var projects = DEV_PROJECTS
     
     @State private var viewModel = ProjectViewModel()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
     @State private var projectId: UUID? = nil
-//    @State var currentProject = "my-vue-app"
     @State var projectPath = "~/mu-pc/projects/CRM"
     
     @State var showAlertOpenProject = false
@@ -27,6 +27,32 @@ struct ContentView: View {
         }
 
         return projects.first { $0.id == projectId }
+    }
+    
+    private var commandsView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(
+                Array(currentProject?.commands ?? [:]).enumerated(),
+                id: \.element.key
+            ) { index, element in
+
+                CommandRow(
+                    name: element.key,
+                    value: element.value,
+                    status: CommandStatuses.base
+                )
+                .frame(maxWidth: .infinity)
+                .background(index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper)
+
+            }
+        }
+        .padding(.vertical, 5).padding(.horizontal, 20)
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
+        )
+        .padding(.top, 12)
     }
     
     var body: some View {
@@ -51,12 +77,12 @@ struct ContentView: View {
             
             VStack(spacing: 0) {
                 if (currentProject?.id != nil) {
-                HeaderView(
-                    title: currentProject?.name ?? "",
-                    projectPath: currentProject?.path ?? "",
-                    isMutipleLock: false
-                )
-                .padding(.top, 12)
+                    HeaderView(
+                        title: currentProject?.name ?? "",
+                        projectPath: currentProject?.path ?? "",
+                        isMutipleLock: false
+                    )
+                    commandsView
                 } else {
                     Text("You dont have any project")
                         .font(Typography.projectTitle)
@@ -66,11 +92,11 @@ struct ContentView: View {
                 
                 Spacer()
             }
-            .frame(
-                maxWidth: .infinity,
-                maxHeight: .infinity,
-                alignment: .topLeading
-            )
+//            .frame(
+//                maxWidth: .infinity,
+//                maxHeight: .infinity,
+//                alignment: .topLeading
+//            )
         }
         .onChange(of: projects) { _, newProjects in
             if projectId == nil,
@@ -162,3 +188,4 @@ struct ContentView: View {
     ContentView()
         .frame(width: 1080, height: 832)
 }
+

@@ -36,7 +36,6 @@ struct HeaderView: View {
                     .padding(.bottom, projectPath.isEmpty ? 15 : 0)
             }.padding(.horizontal, 10)
             Divider()
-            Spacer()
         }
         .background(Theme.Surface.paper)
     }
