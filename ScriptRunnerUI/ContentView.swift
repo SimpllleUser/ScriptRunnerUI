@@ -11,7 +11,7 @@ enum DialogStateTypes {
 struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
-//     @Query(sort: \Project.name) private var projects: [Project]
+    //     @Query(sort: \Project.name) private var projects: [Project]
     @State var projects = DEV_PROJECTS
     
     @State private var viewModel = ProjectViewModel()
@@ -21,13 +21,20 @@ struct ContentView: View {
     
     @State var showAlertOpenProject = false
     @State var dialogState = DialogStateTypes.base
+    @State var activeIndex: Int? = nil
     private var currentProject: Project? {
         guard let projectId else {
             return nil
         }
-
+        
         return projects.first { $0.id == projectId }
     }
+    
+    private func getBackgroundColor(index: Int) -> Color{
+        if (index == activeIndex) {return Theme.Brand.brand50}
+        return index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper
+    }
+    
     
     private var commandsView: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -35,15 +42,22 @@ struct ContentView: View {
                 Array(currentProject?.commands ?? [:]).enumerated(),
                 id: \.element.key
             ) { index, element in
-
+                
                 CommandRow(
                     name: element.key,
                     value: element.value,
                     status: CommandStatuses.base
                 )
+                .onHover { isHovering in
+                    if isHovering {
+                        activeIndex = index
+                    } else if activeIndex == index {
+                        activeIndex = nil
+                    }
+                }
                 .frame(maxWidth: .infinity)
-                .background(index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper)
-
+                .background(getBackgroundColor(index: index))
+                
             }
         }
         .padding(.vertical, 5).padding(.horizontal, 20)
@@ -92,11 +106,6 @@ struct ContentView: View {
                 
                 Spacer()
             }
-//            .frame(
-//                maxWidth: .infinity,
-//                maxHeight: .infinity,
-//                alignment: .topLeading
-//            )
         }
         .onChange(of: projects) { _, newProjects in
             if projectId == nil,
