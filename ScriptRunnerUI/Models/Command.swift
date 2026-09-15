@@ -6,7 +6,7 @@
 //
 
 enum CommandStatuses {
-    static let base: String = "base"
-    static let active: String = "active"
-    static let error: String = "error"
+    case base
+    case active
+    case error
 }

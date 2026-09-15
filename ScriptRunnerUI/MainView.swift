@@ -4,7 +4,7 @@ import AppKit
 
 enum DialogStateTypes {
     case base
-    case errror
+    case error
     case success
 }
 
@@ -47,7 +47,17 @@ struct ContentView: View {
                     name: element.key,
                     value: element.value,
                     status: CommandStatuses.base
-                )
+                ) {
+                    Button(action: {}) {
+                        Text("Run")
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 7)
+                            .contentShape(Rectangle())
+                    }
+                    
+                    .buttonStyle(AnimatedButtonStyle())
+                    
+                }
                 .onHover { isHovering in
                     if isHovering {
                         activeIndex = index
@@ -159,7 +169,7 @@ struct ContentView: View {
             if dialogState == .base {
                 SelectProjectAlertView { result in
                     guard let result = result else {
-                        dialogState = .errror
+                        dialogState = .error
                         return
                     }
                     
@@ -174,7 +184,7 @@ struct ContentView: View {
                     
                     showAlertOpenProject = false
                 }
-            } else if dialogState == .errror {
+            } else if dialogState == .error {
                 ErrorSelectProjectAlert {
                     dialogState = .base
                 }
