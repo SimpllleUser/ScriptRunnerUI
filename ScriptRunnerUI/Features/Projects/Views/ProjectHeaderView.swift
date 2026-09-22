@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct HeaderView: View {
+struct ProjectHeaderView: View {
     let title: String
     let projectPath: String
     let isMutipleLock: Bool
@@ -22,7 +22,7 @@ struct HeaderView: View {
                 Spacer()
             }.padding(.horizontal, 10)
             HStack(spacing: 0) {
-                SelectView(selection: $packageManager)
+                AppSelect(selection: $packageManager)
                 if (isMutipleLock) {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
@@ -42,6 +42,6 @@ struct HeaderView: View {
 }
 
 #Preview("13\" MacBook - Default") {
-    HeaderView(title: "web-dashboard", projectPath: "test", isMutipleLock: true)
+    ProjectHeaderView(title: "web-dashboard", projectPath: "test", isMutipleLock: true)
         .frame(width: 1280, height: 832, alignment: .topLeading)
 }

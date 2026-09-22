@@ -13,7 +13,7 @@ extension View {
         @ViewBuilder content: @escaping () -> DialogContent
     ) -> some View {
         self.modifier(
-            CustomDialogModifier(
+            DialogModifier(
                 isPresented: isPresented,
                 dialogContent: content
             )

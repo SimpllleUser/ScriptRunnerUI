@@ -1,7 +1,7 @@
 import SwiftUI
 
 
-struct CustomDialogModifier<DialogContent: View>: ViewModifier {
+struct DialogModifier<DialogContent: View>: ViewModifier {
     @Binding var isPresented: Bool
     @ViewBuilder let dialogContent: () -> DialogContent
 
@@ -9,7 +9,7 @@ struct CustomDialogModifier<DialogContent: View>: ViewModifier {
         content
             .overlay {
                 if isPresented {
-                    CustomDialogView(
+                    DialogSheet(
                         isShowing: $isPresented,
                         dialogContent: dialogContent
                     )

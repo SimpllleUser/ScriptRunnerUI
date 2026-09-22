@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NavBarView: View {
+struct ProjectSideBarView: View {
     let projects: [Project]
 
     @Binding var activeProjectId: UUID?
@@ -66,7 +66,7 @@ struct NavBarView: View {
 #Preview {
     @Previewable @State var activeProjectId: UUID? = DEV_PROJECTS.first?.id
 
-    NavBarView(
+    ProjectSideBarView(
         projects: [],
         activeProjectId: $activeProjectId
     )

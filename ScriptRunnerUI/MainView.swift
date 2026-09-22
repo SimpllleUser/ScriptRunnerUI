@@ -14,7 +14,7 @@ struct ContentView: View {
     //     @Query(sort: \Project.name) private var projects: [Project]
     @State var projects = DEV_PROJECTS
     
-    @State private var viewModel = ProjectViewModel()
+    @State private var viewModel = ProjectStore()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
     @State private var projectId: UUID? = nil
     @State var projectPath = "~/mu-pc/projects/CRM"
@@ -82,7 +82,7 @@ struct ContentView: View {
     var body: some View {
         HStack(spacing: 0) {
             
-            NavBarView(projects: projects, activeProjectId: $projectId)
+            ProjectSideBarView(projects: projects, activeProjectId: $projectId)
                 .frame(maxHeight: .infinity)
                 .overlay(
                     Rectangle()
@@ -101,7 +101,7 @@ struct ContentView: View {
             
             VStack(spacing: 0) {
                 if (currentProject?.id != nil) {
-                    HeaderView(
+                    ProjectHeaderView(
                         title: currentProject?.name ?? "",
                         projectPath: currentProject?.path ?? "",
                         isMutipleLock: false
@@ -139,7 +139,7 @@ struct ContentView: View {
             
             ToolbarItem(placement: .automatic) {
                 HStack(spacing: 15) {
-                    ButtonView(
+                    AppButton(
                         label: "Stop all",
                         icon: "stop.circle",
                         onClick: {
@@ -147,14 +147,14 @@ struct ContentView: View {
                         }
                     )
                     
-                    ButtonView(
+                    AppButton(
                         icon: "arrow.trianglehead.clockwise.rotate.90",
                         onClick: {
                             viewModel.deleteAllProjects(context: modelContext)
                         }
                     )
                     
-                    ButtonView(
+                    AppButton(
                         icon: "folder",
                         onClick: {
                             showAlertOpenProject = true
@@ -167,7 +167,7 @@ struct ContentView: View {
         }
         .customDialog(isPresented: $showAlertOpenProject) {
             if dialogState == .base {
-                SelectProjectAlertView { result in
+                AddProjectSheet{ result in
                     guard let result = result else {
                         dialogState = .error
                         return
@@ -185,7 +185,7 @@ struct ContentView: View {
                     showAlertOpenProject = false
                 }
             } else if dialogState == .error {
-                ErrorSelectProjectAlert {
+                InvalidPackageManifestView {
                     dialogState = .base
                 }
             }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SelectProjectAlertView: View {
+struct AddProjectSheet: View {
     
     var onProjectSelected: ((_ result: (path: String, commands: [String: String])?) -> Void)
     var body: some View {
@@ -52,7 +52,7 @@ struct SelectProjectAlertView: View {
 }
 
 #Preview {
-    SelectProjectAlertView(onProjectSelected: { result in
+    AddProjectSheet(onProjectSelected: { result in
         if (result != nil) {
             print(result?.path ?? "")
         }

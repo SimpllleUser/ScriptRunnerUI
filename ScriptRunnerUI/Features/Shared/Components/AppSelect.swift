@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SelectView: View {
+struct AppSelect: View {
     @Binding var selection: String
     let options = ["npm", "yarn", "pnpm"]
     
@@ -39,6 +39,6 @@ struct SelectView: View {
 }
 
 #Preview("Select") {
-    SelectView(selection: .constant("npm"))
+    AppSelect(selection: .constant("npm"))
         .padding(100)
 }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ButtonView: View {
+struct AppButton: View {
     var label: String = ""
     var icon: String = ""
     
@@ -33,7 +33,7 @@ struct ButtonView: View {
 }
 
 #Preview {
-    ButtonView(label: "Run", icon: "play", onClick: {
+    AppButton(label: "Run", icon: "play", onClick: {
         print("onClick")
     })
     .padding(50)

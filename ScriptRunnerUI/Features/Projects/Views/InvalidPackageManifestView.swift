@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ErrorSelectProjectAlert: View {
+struct InvalidPackageManifestView: View {
     
     var reload: (() -> Void)
 
@@ -32,7 +32,7 @@ struct ErrorSelectProjectAlert: View {
             }
             .padding(15)
             HStack {
-                ButtonView(label: "Reload", onClick: reload)
+                AppButton(label: "Reload", onClick: reload)
             }
         }
 
@@ -40,7 +40,7 @@ struct ErrorSelectProjectAlert: View {
 }
 
 #Preview {
-    ErrorSelectProjectAlert(reload: {
+    InvalidPackageManifestView(reload: {
         print("Reload")
     }).frame(width: .infinity, height: 300)
 }

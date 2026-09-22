@@ -11,7 +11,7 @@ import SwiftUI
 
 @Observable
 @MainActor
-final class ProjectViewModel {
+final class ProjectStore {
     
 //    private let context: ModelContext
 //    private var projects: [Project] = []

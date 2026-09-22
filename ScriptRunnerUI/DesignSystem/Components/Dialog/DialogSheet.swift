@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CustomDialogView<DialogContent: View>: View {
+struct DialogSheet<DialogContent: View>: View {
     @Binding var isShowing: Bool
     @ViewBuilder let dialogContent: () -> DialogContent
 
