@@ -11,8 +11,8 @@ enum DialogStateTypes {
 struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
-         @Query(sort: \Project.name) private var projects: [Project]
-//    @State var projects = DEV_PROJECTS
+    @Query(sort: \Project.name) private var projects: [Project]
+    //    @State var projects = DEV_PROJECTS
     
     @State private var viewModel = ProjectStore()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
@@ -34,7 +34,7 @@ struct ContentView: View {
         if (index == activeIndex) {return Theme.Brand.brand50}
         return index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper
     }
-    
+    let runner = TaskRunner()
     
     private var commandsView: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -48,7 +48,19 @@ struct ContentView: View {
                     value: element.value,
                     status: CommandStatuses.base
                 ) {
-                    Button(action: {}) {
+                    Button(action: {
+                        runner.runCommand(
+                            packageManager: currentProject?.packageManager ?? "",
+                            projectPath: currentProject?.path ?? "",
+                            arguments: [element.key],
+                            onOutput: { output in
+                                    print(output)
+                                },
+                                onComplete: { status in
+                                    print("Процес завершився зі статусом \(status)")
+                                }
+                        )
+                    }) {
                         Text("Run")
                             .padding(.horizontal, 20)
                             .padding(.vertical, 7)

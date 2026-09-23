@@ -12,7 +12,7 @@ struct CommandRow<Content: View>: View {
       let value: String
       let status: CommandStatuses
       @ViewBuilder let content: () -> Content
-
+    
       init(
           name: String,
           value: String,
