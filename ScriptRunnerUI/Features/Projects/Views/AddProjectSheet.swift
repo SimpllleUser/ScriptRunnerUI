@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AddProjectSheet: View {
     
-    var onProjectSelected: ((_ result: (path: String, commands: [String: String])?) -> Void)
+    var onProjectSelected: ((ProjectData?) -> Void)
     var body: some View {
         VStack {
             HStack(spacing: 0) {

@@ -20,8 +20,8 @@ final class ProjectStore {
         
     }
     
-    func addProject(name: String, path: String, commands: [String: String], context: ModelContext) {
-        let newProject = Project(path: path, commands: commands,  name: name)
+    func addProject(name: String, path: String, commands: [String: String], packageManager: String, context: ModelContext) {
+        let newProject = Project(path: path, commands: commands,  name: name, packageManager: packageManager)
         context.insert(newProject)
     }
     

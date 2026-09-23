@@ -11,7 +11,7 @@ struct ProjectHeaderView: View {
     let title: String
     let projectPath: String
     let isMutipleLock: Bool
-    @State var packageManager = "npm"
+    let packageManager: String
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -22,7 +22,8 @@ struct ProjectHeaderView: View {
                 Spacer()
             }.padding(.horizontal, 10)
             HStack(spacing: 0) {
-                AppSelect(selection: $packageManager)
+                Text(packageManager).font(.caption)
+//                AppSelect(selection: packageManager)
                 if (isMutipleLock) {
                     HStack {
                         Image(systemName: "exclamationmark.triangle")
@@ -42,6 +43,6 @@ struct ProjectHeaderView: View {
 }
 
 #Preview("13\" MacBook - Default") {
-    ProjectHeaderView(title: "web-dashboard", projectPath: "test", isMutipleLock: true)
+    ProjectHeaderView(title: "web-dashboard", projectPath: "test", isMutipleLock: true, packageManager: "npm")
         .frame(width: 1280, height: 832, alignment: .topLeading)
 }

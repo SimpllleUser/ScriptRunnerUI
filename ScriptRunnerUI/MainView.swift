@@ -11,8 +11,8 @@ enum DialogStateTypes {
 struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
-    //     @Query(sort: \Project.name) private var projects: [Project]
-    @State var projects = DEV_PROJECTS
+         @Query(sort: \Project.name) private var projects: [Project]
+//    @State var projects = DEV_PROJECTS
     
     @State private var viewModel = ProjectStore()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
@@ -104,7 +104,8 @@ struct ContentView: View {
                     ProjectHeaderView(
                         title: currentProject?.name ?? "",
                         projectPath: currentProject?.path ?? "",
-                        isMutipleLock: false
+                        isMutipleLock: false,
+                        packageManager: currentProject?.packageManager ?? ""
                     )
                     commandsView
                 } else {
@@ -179,7 +180,8 @@ struct ContentView: View {
                         name: name,
                         path: result.path,
                         commands: result.commands,
-                        context: modelContext
+                        packageManager: result.packageManager,
+                        context: modelContext,
                     )
                     
                     showAlertOpenProject = false

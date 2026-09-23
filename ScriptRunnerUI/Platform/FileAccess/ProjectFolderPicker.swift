@@ -1,21 +1,39 @@
 import SwiftUI
 
 
-func selectFile(onProjectSelected: ((_ result: (path: String, commands: [String: String])?) -> Void)) {
+struct ProjectData {
+    let path: String
+    let commands: [String: String]
+    let packageManager: String
+}
+
+func selectFile(onProjectSelected: (ProjectData?) -> Void) {
     let panel = NSOpenPanel()
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = true
     panel.canChooseFiles = false
     
-    guard panel.runModal() == .OK,
-          let url = panel.url,
-          let content = readFile(at: "\(url.path)/package.json"),
-          let scriptsDictionary = extractScripts(from: content) else {
+    guard panel.runModal() == .OK, let url = panel.url else {
         onProjectSelected(nil)
         return
     }
     
-    onProjectSelected((path: url.path, commands: scriptsDictionary))
+    let packagePath = url.appendingPathComponent("package.json").path
+    
+    guard let content = readFile(at: packagePath),
+          let extractedData = extractScripts(from: content),
+          let scriptsDictionary = extractedData.scripts else {
+        onProjectSelected(nil)
+        return
+    }
+    
+    let projectData = ProjectData(
+        path: url.path,
+        commands: scriptsDictionary,
+        packageManager: extractedData.packageManager
+    )
+    
+    onProjectSelected(projectData)
 }
 
 private func readFile(at path: String) -> String? {
