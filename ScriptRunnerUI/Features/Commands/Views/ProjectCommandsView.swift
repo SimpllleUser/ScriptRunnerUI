@@ -23,7 +23,7 @@ struct ProjectCommandsView: View {
                     CommandRow(
                         name: element.key,
                         value: element.value,
-                        status: CommandStatuses.base,
+                        status: processManager.getCommandStatus(command: element.key),
                         selectCommand: {
                             processManager.setActiveCommand(command: element.key)
                         }
