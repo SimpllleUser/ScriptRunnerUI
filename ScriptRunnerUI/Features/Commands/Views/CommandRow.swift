@@ -12,16 +12,19 @@ struct CommandRow<Content: View>: View {
       let value: String
       let status: CommandStatuses
       @ViewBuilder let content: () -> Content
+     var selectCommand: (() -> Void)? = nil
     
       init(
           name: String,
           value: String,
           status: CommandStatuses,
+          selectCommand: (() -> Void)? = nil,
           @ViewBuilder content: @escaping () -> Content
       ) {
           self.name = name
           self.value = value
           self.status = status
+          self.selectCommand = selectCommand
           self.content = content
       }
 
@@ -46,7 +49,9 @@ struct CommandRow<Content: View>: View {
         HStack {
             Circle().fill(statusColor).frame(width: 10, height: 10)
             VStack(alignment: .leading) {
-                Text(name).font(Typography.sidebarItem)
+                Text(name).font(Typography.sidebarItem).onTapGesture {
+                    selectCommand?()
+                }
                 Text(value).font(Typography.mono).foregroundStyle(Theme.Text.ink3)
             }
             Spacer()

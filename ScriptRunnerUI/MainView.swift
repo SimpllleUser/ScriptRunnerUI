@@ -34,62 +34,23 @@ struct ContentView: View {
         if (index == activeIndex) {return Theme.Brand.brand50}
         return index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper
     }
-    let runner = TaskRunner()
     
-    private var commandsView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(
-                Array(currentProject?.commands ?? [:]).enumerated(),
-                id: \.element.key
-            ) { index, element in
-                
-                CommandRow(
-                    name: element.key,
-                    value: element.value,
-                    status: CommandStatuses.base
-                ) {
-                    Button(action: {
-                        runner.runCommand(
-                            packageManager: currentProject?.packageManager ?? "",
-                            projectPath: currentProject?.path ?? "",
-                            arguments: [element.key],
-                            onOutput: { output in
-                                    print(output)
-                                },
-                                onComplete: { status in
-                                    print("Процес завершився зі статусом \(status)")
-                                }
-                        )
-                    }) {
-                        Text("Run")
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 7)
-                            .contentShape(Rectangle())
-                    }
-                    
-                    .buttonStyle(AnimatedButtonStyle())
-                    
-                }
-                .onHover { isHovering in
-                    if isHovering {
-                        activeIndex = index
-                    } else if activeIndex == index {
-                        activeIndex = nil
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .background(getBackgroundColor(index: index))
-                
-            }
-        }
-        .padding(.vertical, 5).padding(.horizontal, 20)
-        .frame(
-            maxWidth: .infinity,
-            maxHeight: .infinity,
-            alignment: .topLeading
-        )
-        .padding(.top, 12)
-    }
+//    private var commandsView: some View {
+//        VStack(alignment: .leading, spacing: 0) {
+//            if (currentProject != nil) {
+//            ProjectCommandsView(
+//                project: currentProject
+//            )
+//            }
+//        }
+//        .padding(.vertical, 5).padding(.horizontal, 20)
+//        .frame(
+//            maxWidth: .infinity,
+//            maxHeight: .infinity,
+//            alignment: .topLeading
+//        )
+//        .padding(.top, 12)
+//    }
     
     var body: some View {
         HStack(spacing: 0) {
@@ -112,14 +73,16 @@ struct ContentView: View {
                 }
             
             VStack(spacing: 0) {
-                if (currentProject?.id != nil) {
+                if (currentProject != nil) {
                     ProjectHeaderView(
                         title: currentProject?.name ?? "",
                         projectPath: currentProject?.path ?? "",
                         isMutipleLock: false,
                         packageManager: currentProject?.packageManager ?? ""
                     )
-                    commandsView
+                    ProjectCommandsView(
+                        project: currentProject!
+                    )
                 } else {
                     Text("You dont have any project")
                         .font(Typography.projectTitle)
