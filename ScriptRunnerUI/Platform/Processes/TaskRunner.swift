@@ -1,69 +1,243 @@
+
+import Foundation
+
+enum TaskStatus {
+    case none
+    case start
+    case ready
+    case error
+}
+
+
+
 import Foundation
 
 class TaskRunner {
-    
+
+    // Зберігаємо процес для перевірки стану та зупинки.
+    private var task: Process?
+
+    // Чи працює процес у цей момент.
+    var isRunning: Bool {
+        task?.isRunning ?? false
+    }
+
     func runCommand(
-        packageManager: String, // Назва менеджера (npm, yarn, bun)
-        projectPath: String, // Шлях до папки з проєктом
-        arguments: [String], // Масив аргументів (наприклад, ["run", "dev"])
-        onOutput: @escaping (String) -> Void, // Коллбек для передачі тексту з консолі в UI
-        onComplete: @escaping (Int32) -> Void // Коллбек для передачі статусу завершення (0 - успіх, інші - помилка)
+        packageManager: String,
+        projectPath: String,
+        arguments: [String],
+
+        // Процес успішно запущений операційною системою.
+        onStart: @escaping () -> Void = {},
+
+        // Сервер повідомив про готовність.
+        // Для Nuxt визначаємо за повідомленням "Local:".
+        onReady: @escaping () -> Void = {},
+
+        // Вивід консолі в реальному часі.
+        onOutput: @escaping (String) -> Void,
+
+        // Процес завершився.
+        onComplete: @escaping (Int32) -> Void
     ) {
-        // 1. Ініціалізація процесу та труби (Pipe) для перехоплення виводу
-        let task = Process()
+
+        // MARK: - 1. Перевірка процесу
+
+        // Не запускаємо другу команду, поки
+        // попередня ще виконується.
+        guard task == nil else {
+            onOutput("A command is already running.\n")
+            return
+        }
+
+        // MARK: - 2. Ініціалізація
+
+        let process = Process()
         let pipe = Pipe()
-        
-        // 2. Вказуємо шлях до оболонки (zsh), через яку будемо виконувати команди
-        task.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        
-        // 3. Формуємо команду: якщо рядок порожній, використовуємо npm як фолбек
-        let manager = packageManager.isEmpty ? "npm" : packageManager
-        let commandArgs = arguments.joined(separator: " ") // Об'єднуємо масив ["run", "dev"] у рядок "run dev"
-        
-        // 4. Створюємо мультирядковий скрипт для налаштування середовища перед запуском
+
+        task = process
+
+        process.executableURL = URL(
+            fileURLWithPath: "/bin/zsh"
+        )
+
+        // MARK: - 3. Формування команди
+
+        let manager = packageManager.isEmpty
+            ? "npm"
+            : packageManager
+
+        // Екранування значень для shell.
+        func shellEscape(_ value: String) -> String {
+            "'" + value.replacingOccurrences(
+                of: "'",
+                with: "'\\''"
+            ) + "'"
+        }
+
+        let commandArgs = arguments
+            .map(shellEscape)
+            .joined(separator: " ")
+
         let fullCommand = """
-        export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" # Додаємо шляхи Homebrew
-        export NVM_DIR="$HOME/.nvm" # Вказуємо шлях до NVM (Node Version Manager)
-        [ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh" # Завантажуємо NVM, якщо він існує
-        source $HOME/.zshrc 2>/dev/null # Примусово читаємо налаштування користувача (ігноруємо помилки)
-        cd '\(projectPath)' && \(manager) \(commandArgs) # Переходимо в папку проєкту і запускаємо команду
+        export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+        source "$HOME/.zshrc" 2>/dev/null
+        cd \(shellEscape(projectPath)) && \
+        \(shellEscape(manager)) \(commandArgs)
         """
-        
-        // 5. Передаємо аргументи для zsh
-        // -i: інтерактивний режим, -l: login shell (завантажує профілі), -c: виконати наступний рядок
-        task.arguments = ["-i", "-l", "-c", fullCommand]
-        
-        // 6. Прив'язуємо нашу трубу (Pipe) до стандартного виводу та виводу помилок
-        task.standardOutput = pipe
-        task.standardError = pipe
-        
-        // 7. Налаштовуємо асинхронне читання даних, щойно вони з'являються в процесі
-        pipe.fileHandleForReading.readabilityHandler = { fileHandle in
+
+        process.arguments = [
+            "-i",
+            "-l",
+            "-c",
+            fullCommand
+        ]
+
+        // MARK: - 4. Налаштування потоків
+
+        process.standardOutput = pipe
+        process.standardError = pipe
+
+        // Прапорець, який запобігає повторному onReady.
+        // Змінюємо його лише в головній черзі.
+        var isReady = false
+
+        // Тимчасовий буфер для пошуку повідомлення
+        // про готовність сервера.
+        var outputBuffer = ""
+
+        // MARK: - 5. Отримання виводу
+
+        pipe.fileHandleForReading.readabilityHandler = {
+            fileHandle in
+
             let data = fileHandle.availableData
-            if !data.isEmpty, let output = String(data: data, encoding: .utf8) {
-                // Перемикаємось на головний потік, оскільки цей блок працює у фоні, а UI оновлюється лише в Main
-                DispatchQueue.main.async {
-                    onOutput(output)
+
+            guard !data.isEmpty else {
+                return
+            }
+
+            let output = String(
+                decoding: data,
+                as: UTF8.self
+            )
+
+            DispatchQueue.main.async {
+
+                // Передаємо текст у UI.
+                onOutput(output)
+
+                // Якщо сервер уже готовий,
+                // повторно не перевіряємо вивід.
+                guard !isReady else {
+                    return
+                }
+
+                outputBuffer += output
+
+                // Nuxt зазвичай виводить:
+                // ➜ Local: http://localhost:3000/
+                //
+                // Це спрощений індикатор готовності.
+                // Інші CLI-команди можуть не мати
+                // такого повідомлення.
+                if outputBuffer.contains("Local:") {
+                    isReady = true
+                    outputBuffer = ""
+
+                    onReady()
+                }
+
+                // Не дозволяємо буферу
+                // необмежено збільшуватися.
+                if outputBuffer.count > 4096 {
+                    outputBuffer = String(
+                        outputBuffer.suffix(4096)
+                    )
                 }
             }
         }
-        
-        // 8. Налаштовуємо дію при завершенні процесу
-        task.terminationHandler = { process in
-            pipe.fileHandleForReading.readabilityHandler = nil // Відключаємо слухача, щоб уникнути витоків пам'яті
+
+        // MARK: - 6. Завершення процесу
+
+        process.terminationHandler = { [weak self] finishedProcess in
+
+            // Зупиняємо обробник нових повідомлень.
+            pipe.fileHandleForReading.readabilityHandler = nil
+
+            // Отримуємо залишок даних із Pipe.
+            let remainingData = pipe.fileHandleForReading
+                .readDataToEndOfFile()
+
+            let remainingOutput = String(
+                decoding: remainingData,
+                as: UTF8.self
+            )
+
             DispatchQueue.main.async {
-                onComplete(process.terminationStatus) // Повертаємо код завершення (0 = ОК)
+
+                // Передаємо залишок виводу.
+                if !remainingOutput.isEmpty {
+                    onOutput(remainingOutput)
+                }
+
+                // Звільняємо процес після завершення.
+                if self?.task === finishedProcess {
+                    self?.task = nil
+                }
+
+                // onComplete викликається навіть тоді,
+                // коли сервер так і не став готовим.
+                onComplete(finishedProcess.terminationStatus)
             }
         }
-        
-        // 9. Запуск процесу з обробкою можливої помилки старту
+
+        // MARK: - 7. Запуск процесу
+
         do {
-            try task.run()
-        } catch {
+            try process.run()
+
             DispatchQueue.main.async {
-                onOutput("Error: \(error.localizedDescription)\n")
-                onComplete(-1) // Повертаємо -1, що означає помилку запуску
+
+                // Успішний task.run() означає,
+                // що zsh запустився.
+                //
+                // Це ще НЕ означає, що Nuxt
+                // завершив компіляцію або готовий
+                // приймати HTTP-запити.
+                onStart()
+            }
+
+        } catch {
+
+            pipe.fileHandleForReading.readabilityHandler = nil
+
+            if task === process {
+                task = nil
+            }
+
+            DispatchQueue.main.async {
+                onOutput(
+                    "Error: \(error.localizedDescription)\n"
+                )
+
+                onComplete(-1)
             }
         }
+    }
+
+    // MARK: - 8. Зупинка процесу
+
+    func stopCommand() {
+        guard let task, task.isRunning else {
+            return
+        }
+
+        // Надсилаємо процесу SIGTERM.
+        // Це не гарантує зупинку всіх
+        // дочірніх процесів zsh.
+        task.terminate()
     }
 }
