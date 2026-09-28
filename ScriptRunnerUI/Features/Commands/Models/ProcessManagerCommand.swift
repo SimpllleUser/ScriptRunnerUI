@@ -9,6 +9,7 @@ import SwiftUI
 
 @Observable
 class ProcessManagerCommand {
+    var projectId: UUID
     var commands: [String]
     var commandsStatuses: [String: TaskStatus]
     var activeComand: String? = ""
@@ -16,7 +17,8 @@ class ProcessManagerCommand {
     var runner = TaskRunner()
     var path: String
     
-    init(commands: [String], path: String) {
+    init(projectId: UUID,commands: [String], path: String) {
+        self.projectId = projectId
         self.commands = commands
         self.activeComand = ""
         self.processOutput = commands.reduce(into: [String: String]()) { result, key in result[key] = "" }
@@ -47,8 +49,18 @@ class ProcessManagerCommand {
         return self.commandsStatuses[command] ?? TaskStatus.none
     }
     
+    func stopCommand(command: String) {
+        let isStopped = self.runner.stopCommand(projectId: projectId, command: command)
+        if (isStopped) {
+            self.commandsStatuses[command] = TaskStatus.none
+            self.processOutput[command] = ""
+        }
+        
+    }
+    
     func runCommand(packageManager: String, command: String) {
         self.runner.runCommand(
+            projectId: projectId,
             packageManager: packageManager,
             projectPath: self.path,
             arguments: [command],

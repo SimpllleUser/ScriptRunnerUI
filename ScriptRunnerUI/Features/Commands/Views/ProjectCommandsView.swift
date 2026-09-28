@@ -2,13 +2,15 @@ import SwiftUI
 
 struct ProjectCommandsView: View {
     let project: Project
-    @State private var processManager: ProcessManagerCommand
+    let manager: ProcessManagerCommand
+//    @State private var processManager: ProcessManagerCommand
     @State private var activeIndex: Int? = nil
     
-    init(project: Project) {
+    init(project: Project, manager: ProcessManagerCommand) {
         self.project = project
-        let commandsArray = Array(project.commands.keys)
-        self._processManager = State(initialValue: ProcessManagerCommand(commands: commandsArray, path: project.path))
+        self.manager = manager
+//        _ = Array(project.commands.keys)
+//        self._processManager = State(initialValue: ProcessManagerCommand(commands: commandsArray, path: project.path))
     }
     
     private func getBackgroundColor(index: Int) -> Color {
@@ -23,24 +25,34 @@ struct ProjectCommandsView: View {
                     CommandRow(
                         name: element.key,
                         value: element.value,
-                        status: processManager.getCommandStatus(command: element.key),
+                        status: manager.getCommandStatus(command: element.key),
                         selectCommand: {
-                            processManager.setActiveCommand(command: element.key)
+                            manager.setActiveCommand(command: element.key)
                         }
                     ) {
-                        Button(action: {
-                            processManager.setActiveCommand(command: element.key)
-                            processManager.runCommand(
-                                packageManager: project.packageManager,
-                                command: element.key,
-                            )
-                        }) {
-                            Text("Run")
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 7)
-                                .contentShape(Rectangle())
+                        CommandActionButton(status: manager.getCommandStatus(command: element.key)) {
+                            isRunned in
+                            manager.setActiveCommand(command: element.key)
+                            if(isRunned) {
+                                manager.stopCommand(command: element.key)
+                            } else {
+                                manager.runCommand(packageManager: project.packageManager, command: element.key)
+
+                            }
                         }
-                        .buttonStyle(AnimatedButtonStyle())
+//                        Button(action: {
+//                            manager.setActiveCommand(command: element.key)
+//                            manager.runCommand(
+//                                packageManager: project.packageManager,
+//                                command: element.key,
+//                            )
+//                        }) {
+//                            Text("Run")
+//                                .padding(.horizontal, 20)
+//                                .padding(.vertical, 7)
+//                                .contentShape(Rectangle())
+//                        }
+//                        .buttonStyle(AnimatedButtonStyle())
                     }
                     .onHover { isHovering in
                         if isHovering {
@@ -62,9 +74,9 @@ struct ProjectCommandsView: View {
             )
             .padding(.top, 12)
         }
-        if (!processManager.getCommandResult().isEmpty) {
+        if (!manager.getCommandResult().isEmpty) {
             ScrollView {
-                ConsoleView(value: processManager.getCommandResult())
+                ConsoleView(value: manager.getCommandResult())
             }
         }
     }

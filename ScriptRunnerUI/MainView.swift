@@ -13,7 +13,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Project.name) private var projects: [Project]
     //    @State var projects = DEV_PROJECTS
-    
+    @State private var executionStore = ProjectExecutionStore()
     @State private var viewModel = ProjectStore()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
     @State private var projectId: UUID? = nil
@@ -22,35 +22,28 @@ struct ContentView: View {
     @State var showAlertOpenProject = false
     @State var dialogState = DialogStateTypes.base
     @State var activeIndex: Int? = nil
+
     private var currentProject: Project? {
         guard let projectId else {
             return nil
         }
-        
+
         return projects.first { $0.id == projectId }
     }
+
+    private var currentManager: ProcessManagerCommand? {
+        guard let currentProject else {
+            return nil
+        }
+
+        return executionStore.mannager(for: currentProject)
+    }
+    
     
     private func getBackgroundColor(index: Int) -> Color{
         if (index == activeIndex) {return Theme.Brand.brand50}
         return index % 2 == 0 ? Theme.Surface.paper2 : Theme.Surface.paper
     }
-    
-//    private var commandsView: some View {
-//        VStack(alignment: .leading, spacing: 0) {
-//            if (currentProject != nil) {
-//            ProjectCommandsView(
-//                project: currentProject
-//            )
-//            }
-//        }
-//        .padding(.vertical, 5).padding(.horizontal, 20)
-//        .frame(
-//            maxWidth: .infinity,
-//            maxHeight: .infinity,
-//            alignment: .topLeading
-//        )
-//        .padding(.top, 12)
-//    }
     
     var body: some View {
         HStack(spacing: 0) {
@@ -74,15 +67,12 @@ struct ContentView: View {
             
             VStack(spacing: 0) {
                 if (currentProject != nil) {
-                    ProjectHeaderView(
-                        title: currentProject?.name ?? "",
-                        projectPath: currentProject?.path ?? "",
-                        isMutipleLock: false,
-                        packageManager: currentProject?.packageManager ?? ""
-                    )
-                    ProjectCommandsView(
-                        project: currentProject!
-                    )
+                    if let currentProject, let currentManager {
+                        ProjectCommandsView(
+                            project: currentProject,
+                            manager: currentManager
+                        )
+                    }
                 } else {
                     Text("You dont have any project")
                         .font(Typography.projectTitle)
