@@ -3,14 +3,11 @@ import SwiftUI
 struct ProjectCommandsView: View {
     let project: Project
     let manager: ProcessManagerCommand
-//    @State private var processManager: ProcessManagerCommand
     @State private var activeIndex: Int? = nil
     
     init(project: Project, manager: ProcessManagerCommand) {
         self.project = project
         self.manager = manager
-//        _ = Array(project.commands.keys)
-//        self._processManager = State(initialValue: ProcessManagerCommand(commands: commandsArray, path: project.path))
     }
     
     private func getBackgroundColor(index: Int) -> Color {
@@ -40,19 +37,6 @@ struct ProjectCommandsView: View {
 
                             }
                         }
-//                        Button(action: {
-//                            manager.setActiveCommand(command: element.key)
-//                            manager.runCommand(
-//                                packageManager: project.packageManager,
-//                                command: element.key,
-//                            )
-//                        }) {
-//                            Text("Run")
-//                                .padding(.horizontal, 20)
-//                                .padding(.vertical, 7)
-//                                .contentShape(Rectangle())
-//                        }
-//                        .buttonStyle(AnimatedButtonStyle())
                     }
                     .onHover { isHovering in
                         if isHovering {

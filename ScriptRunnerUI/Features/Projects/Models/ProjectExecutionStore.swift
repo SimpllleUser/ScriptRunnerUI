@@ -9,19 +9,19 @@ import SwiftUI
 
 @Observable
 class ProjectExecutionStore {
-    private var mannagers: [UUID: ProcessManagerCommand] = [:]
+    private var managers: [UUID: ProcessManagerCommand] = [:]
     
-    func mannager(for project: Project) -> ProcessManagerCommand {
-        if let mannager = mannagers[project.id] {
-            return mannager
+    func manager(for project: Project) -> ProcessManagerCommand {
+        if let manager = managers[project.id] {
+            return manager
         }
         
-        let mannager = ProcessManagerCommand(
+        let manager = ProcessManagerCommand(
             projectId: project.id,
             commands: Array(project.commands.keys),
             path: project.path
         )
-        mannagers[project.id] = mannager
-        return mannager
+        managers[project.id] = manager
+        return manager
     }
 }

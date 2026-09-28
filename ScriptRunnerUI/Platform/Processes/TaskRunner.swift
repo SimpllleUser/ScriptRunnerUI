@@ -231,7 +231,9 @@ class TaskRunner {
             }
         }
         
-        return true
+        stopped = true
+        
+        return stopped
     }
 
     // MARK: - Зупинка конкретного запуску

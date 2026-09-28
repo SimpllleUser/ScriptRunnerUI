@@ -12,7 +12,6 @@ struct ContentView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Project.name) private var projects: [Project]
-    //    @State var projects = DEV_PROJECTS
     @State private var executionStore = ProjectExecutionStore()
     @State private var viewModel = ProjectStore()
     @AppStorage("projectId") private var projectIdString: String = DEV_PROJECTS.first?.id.uuidString ?? ""
@@ -36,7 +35,7 @@ struct ContentView: View {
             return nil
         }
 
-        return executionStore.mannager(for: currentProject)
+        return executionStore.manager(for: currentProject)
     }
     
     
