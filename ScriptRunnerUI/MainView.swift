@@ -108,7 +108,7 @@ struct ContentView: View {
                         label: "Stop all",
                         icon: "stop.circle",
                         onClick: {
-                            print("Stop")
+                            currentManager?.stopAll()
                         }
                     )
                     

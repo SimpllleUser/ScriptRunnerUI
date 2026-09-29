@@ -57,6 +57,11 @@ class ProcessManagerCommand {
         }
         
     }
+    func stopAll() {
+        self.commands.forEach { command in
+            self.stopCommand(command: command)
+        }
+    }
     
     func runCommand(packageManager: String, command: String) {
         self.runner.runCommand(
