@@ -115,7 +115,8 @@ struct ContentView: View {
                     AppButton(
                         icon: "arrow.trianglehead.clockwise.rotate.90",
                         onClick: {
-                            viewModel.deleteAllProjects(context: modelContext)
+                            currentManager?.restartActiveCommands(packageManager: currentProject?.packageManager ?? "")
+//                            viewModel.deleteAllProjects(context: modelContext)
                         }
                     )
                     

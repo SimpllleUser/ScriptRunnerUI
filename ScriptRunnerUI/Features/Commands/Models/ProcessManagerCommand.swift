@@ -63,6 +63,22 @@ class ProcessManagerCommand {
         }
     }
     
+    func restartActiveCommands(packageManager: String) {
+        let activeCommands = self.commands.filter { command in
+            self.runner.isRunning(
+                projectId: self.projectId,
+                command: command
+            )
+        }
+        activeCommands.forEach { command in
+           let isStopped =  self.runner.stopCommand(projectId: self.projectId, command: command)
+            if (isStopped) {
+                self.runCommand(packageManager: packageManager, command: command)
+            }
+        }
+        
+    }
+    
     func runCommand(packageManager: String, command: String) {
         self.runner.runCommand(
             projectId: projectId,
