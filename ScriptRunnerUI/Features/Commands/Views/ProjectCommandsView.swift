@@ -34,7 +34,7 @@ struct ProjectCommandsView: View {
                                 manager.stopCommand(command: element.key)
                             } else {
                                 manager.runCommand(packageManager: project.packageManager, command: element.key)
-
+                                
                             }
                         }
                     }
@@ -59,9 +59,7 @@ struct ProjectCommandsView: View {
             .padding(.top, 12)
         }
         if (!manager.getCommandResult().isEmpty) {
-            ScrollView {
-                ConsoleView(value: manager.getCommandResult())
-            }
+            ConsoleView(value: manager.getCommandResult())
         }
     }
 }
