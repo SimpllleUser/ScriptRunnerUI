@@ -59,7 +59,7 @@ struct ProjectCommandsView: View {
             .padding(.top, 12)
         }
         if (!manager.getCommandResult().isEmpty) {
-            ConsoleView(value: manager.getCommandResult())
+            ConsoleView(command: manager.activeComand ?? "", value: manager.getCommandResult())
         }
     }
 }
