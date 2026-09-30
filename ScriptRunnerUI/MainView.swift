@@ -47,7 +47,10 @@ struct ContentView: View {
     var body: some View {
         HStack(spacing: 0) {
             
-            ProjectSideBarView(projects: projects, activeProjectId: $projectId)
+            ProjectSideBarView(
+                projects: projects,
+                executionStore: executionStore,
+                activeProjectId: $projectId)
                 .frame(maxHeight: .infinity)
                 .overlay(
                     Rectangle()
