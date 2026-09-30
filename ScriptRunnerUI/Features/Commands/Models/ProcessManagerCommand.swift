@@ -80,7 +80,9 @@ class ProcessManagerCommand {
     }
     
     func getAmountActiveCommands() -> Int {
-        return self.commands.filter{command in self.runner.isRunning(projectId: self.projectId, command: command)}.count
+        commandsStatuses.values.filter {
+               $0 == .start || $0 == .ready
+           }.count
     }
     
     func runCommand(packageManager: String, command: String) {
